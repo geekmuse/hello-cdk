@@ -1,24 +1,27 @@
+ENV ?= dev
+default_target: help
+.PHONY:	help compile gencft build clean destroy
 
+help:				## This help.
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY:	compile gencft build clean destroy
+gencft: compile			## Generates a CloudFormation template in local "cft" directory.
+	-mkdir -p "./cft/$(ENV)"
+	cdk synth -c ENV=$(ENV) "HelloCdkBase-$(ENV)" >./cft/$(ENV)/base.yaml
 
-gencft: compile
-	-rm -rf ./cft
-	mkdir -p ./cft
-	cdk synth HelloCdkStack >./cft/stack.yaml
-
-compile:
+compile:			## Runs TypeScript to generate *.js files.
+	@echo "Building for ENV: $(ENV)"
 	npm run build
 
-build: compile
-	cdk deploy
+build: compile			## Runs "compile" target + deploys CloudFormation stack.
+	cdk deploy -c ENV=$(ENV)
 
-clean:
+clean:				## Cleans up "compile" and "gencft" target artifacts.
 	-rm -rf ./cft
 	-rm ./bin/*.d.ts
 	-rm ./bin/*.js
 	-rm ./lib/*.d.ts
 	-rm ./lib/*.js
 
-destroy:
-	cdk destroy
+destroy:			## Destroys CloudFormation stack.  **WARNING: DESTRUCTIVE**
+	cdk destroy -c ENV=$(ENV)

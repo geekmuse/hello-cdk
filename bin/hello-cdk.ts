@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import cdk = require('@aws-cdk/cdk');
-import { HelloCdkStack } from '../lib/hello-cdk-stack';
+import { HelloCdkBase } from '../lib/hello-cdk-base';
+// import { HelloCdkStack } from '../lib/hello-cdk-stack';
 
 const app = new cdk.App();
-new HelloCdkStack(app, 'HelloCdkStack');
+const stackName = 'HelloCdkBase-' + app.getContext('ENV')
+new HelloCdkBase(app, stackName, {}, app.getContext('ENV'));
 app.run();
